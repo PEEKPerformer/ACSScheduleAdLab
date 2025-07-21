@@ -10,6 +10,7 @@ const router = createBrowserRouter(
     ...route,
     element: <Layout>{route.element}</Layout>,
   })), {
+  basename: '/ACSScheduleAdLab/',
   future: {
     v7_relativeSplatPath: true,
     v7_fetcherPersist: true,
