@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Calendar, Clock, MapPin, Users, CheckCircle, Play, Clock3, ExternalLink, Zap } from 'lucide-react';
 
 interface Presentation {
@@ -85,19 +85,173 @@ const presentations: Presentation[] = [
   }
 ];
 
-const FloatingOrb = ({ delay = 0, duration = 20 }) => (
-  <div 
-    className="fixed pointer-events-none opacity-20"
-    style={{
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      animationDelay: `${delay}s`,
-      animationDuration: `${duration}s`
-    }}
-  >
-    <div className="w-4 h-4 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-ping"></div>
-  </div>
-);
+const ParticleBackground = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const particlesRef = useRef<any[]>([]);
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const animationRef = useRef<number>();
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+
+    const createParticle = () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      size: Math.random() * 3 + 1,
+      opacity: Math.random() * 0.5 + 0.2,
+      color: Math.random() > 0.5 ? '#3b82f6' : '#8b5cf6',
+    });
+
+    const initParticles = () => {
+      particlesRef.current = [];
+      for (let i = 0; i < 50; i++) {
+        particlesRef.current.push(createParticle());
+      }
+    };
+
+    const updateParticles = () => {
+      const particles = particlesRef.current;
+      const mouse = mouseRef.current;
+
+      particles.forEach((particle, i) => {
+        // Mouse interaction
+        const dx = mouse.x - particle.x;
+        const dy = mouse.y - particle.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < 100) {
+          const force = (100 - distance) / 100;
+          particle.vx -= (dx / distance) * force * 0.01;
+          particle.vy -= (dy / distance) * force * 0.01;
+        }
+
+        // Particle interactions
+        particles.forEach((otherParticle, j) => {
+          if (i !== j) {
+            const pdx = otherParticle.x - particle.x;
+            const pdy = otherParticle.y - particle.y;
+            const pdistance = Math.sqrt(pdx * pdx + pdy * pdy);
+            
+            if (pdistance < 50 && pdistance > 0) {
+              const force = (50 - pdistance) / 50;
+              particle.vx -= (pdx / pdistance) * force * 0.002;
+              particle.vy -= (pdy / pdistance) * force * 0.002;
+            }
+          }
+        });
+
+        // Apply velocity with damping
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.vx *= 0.99;
+        particle.vy *= 0.99;
+
+        // Boundary conditions with gentle bounce
+        if (particle.x < 0 || particle.x > canvas.width) {
+          particle.vx *= -0.5;
+          particle.x = Math.max(0, Math.min(canvas.width, particle.x));
+        }
+        if (particle.y < 0 || particle.y > canvas.height) {
+          particle.vy *= -0.5;
+          particle.y = Math.max(0, Math.min(canvas.height, particle.y));
+        }
+      });
+    };
+
+    const drawParticles = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      const particles = particlesRef.current;
+      
+      // Draw connections
+      particles.forEach((particle, i) => {
+        particles.slice(i + 1).forEach((otherParticle) => {
+          const dx = particle.x - otherParticle.x;
+          const dy = particle.y - otherParticle.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          if (distance < 100) {
+            const opacity = (100 - distance) / 100 * 0.2;
+            ctx.strokeStyle = `rgba(139, 92, 246, ${opacity})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(particle.x, particle.y);
+            ctx.lineTo(otherParticle.x, otherParticle.y);
+            ctx.stroke();
+          }
+        });
+      });
+
+      // Draw particles
+      particles.forEach((particle) => {
+        ctx.globalAlpha = particle.opacity;
+        ctx.fillStyle = particle.color;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Add glow effect
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = particle.color;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+      
+      ctx.globalAlpha = 1;
+    };
+
+    const animate = () => {
+      updateParticles();
+      drawParticles();
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const handleResize = () => {
+      resizeCanvas();
+      initParticles();
+    };
+
+    resizeCanvas();
+    initParticles();
+    animate();
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none opacity-60"
+      style={{ zIndex: 1 }}
+    />
+  );
+};
 
 const ACSSchedule = () => {
   const [currentTime, setCurrentTime] = useState(new Date('2025-08-18T15:25:00')); // Simulating during Dr. Adamson's talk
@@ -197,10 +351,8 @@ const ACSSchedule = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 relative overflow-hidden">
-      {/* Floating Orbs */}
-      {Array.from({ length: 6 }, (_, i) => (
-        <FloatingOrb key={i} delay={i * 3} duration={15 + Math.random() * 10} />
-      ))}
+      {/* Interactive Particle Background */}
+      <ParticleBackground />
       
       <div className="max-w-7xl mx-auto px-4 py-8 relative z-10">
         
