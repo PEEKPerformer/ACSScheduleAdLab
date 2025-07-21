@@ -12,6 +12,7 @@ export default defineConfig({
       extensions: ['jsx', 'tsx'],   
     }),
   ],
+  base: '/ACSScheduleAdLab/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
