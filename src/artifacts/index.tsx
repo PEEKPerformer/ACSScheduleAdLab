@@ -341,15 +341,15 @@ const ACSSchedule = () => {
                 icon: CheckCircle,
                 badgeText: 'Complete',
                 badgeColor: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
-                animation: 'animate-[float_6s_ease-in-out_infinite]'
+                animation: '' // Removed constant animation
               },
               current: {
                 opacity: 'opacity-100',
                 transform: 'scale-105 ring-4 ring-white/50',
                 icon: Play,
                 badgeText: 'Live Now',
-                badgeColor: 'bg-white text-slate-900 border border-white shadow-lg',
-                animation: 'animate-[pulse_2s_ease-in-out_infinite]'
+                badgeColor: 'bg-white text-slate-900 border border-white shadow-lg animate-pulse',
+                animation: '' // Moved pulse to badge instead of whole card
               },
               upcoming: {
                 opacity: 'opacity-90',
@@ -357,7 +357,7 @@ const ACSSchedule = () => {
                 icon: Clock3,
                 badgeText: 'Upcoming',
                 badgeColor: 'bg-slate-100 text-slate-700 border border-slate-200',
-                animation: 'animate-[float_4s_ease-in-out_infinite] animation-delay-1000'
+                animation: '' // Removed constant animation
               }
             };
 
@@ -367,7 +367,7 @@ const ACSSchedule = () => {
             return (
               <div
                 key={index}
-                className={`bg-gradient-to-br ${presentation.color} rounded-3xl p-6 shadow-lg text-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ${config.opacity} ${config.transform} ${config.animation}`}
+                className={`bg-gradient-to-br ${presentation.color} rounded-3xl p-6 shadow-lg text-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ${config.opacity} ${config.transform}`}
                 style={{ 
                   animationDelay: `${index * 150}ms`,
                   animationFillMode: 'both'
