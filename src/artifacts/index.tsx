@@ -254,7 +254,7 @@ const ParticleBackground = () => {
 };
 
 const ACSSchedule = () => {
-  const [currentTime, setCurrentTime] = useState(new Date('2025-08-18T15:25:00')); // Simulating during Dr. Adamson's talk
+  const [currentTime, setCurrentTime] = useState(new Date()); // Start with actual current time
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
