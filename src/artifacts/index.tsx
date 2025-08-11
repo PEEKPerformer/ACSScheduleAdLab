@@ -644,7 +644,7 @@ const ACSSchedule = () => {
           <div className="text-center lg:text-left mb-4 lg:mb-0">
             <div className="flex flex-col items-center lg:items-start gap-4">
               <img 
-                src="src/logo4_horizontal.webp" 
+                src="/logo4_horizontal.webp" 
                 alt="Adamson Lab Logo" 
                 className="h-24 lg:h-32 w-auto object-contain drop-shadow-md hover:scale-105 transition-transform duration-300"
               />
@@ -920,7 +920,7 @@ const ACSSchedule = () => {
                   </div>
                   <div className="flex items-start gap-1 text-xs text-white/70 hover:text-white/90 transition-colors duration-300">
                     <Users className="w-3 h-3 mt-0.5 shrink-0" />
-                    <span className="leading-tight">{presentation.session}</span>
+                    <span className="leading-tight text-center sm:text-left">{presentation.session}</span>
                   </div>
                 </div>
                 
